@@ -4,7 +4,7 @@ use axum::{
     http::StatusCode,
     Router,
 };
-use tokio::join;
+use tokio;
 use crate::handlers::{
     cpu::check_cpu_usage,
     ram::check_ram_usage,
@@ -18,13 +18,17 @@ pub fn routes() -> Router {
 }
 
 async fn handler() -> (StatusCode, Json<HealthDTO>) {
-    let (cpu_result, ram_result) = join!(
-        check_cpu_usage(),
-        check_ram_usage(),
-    );
+    let cpu_handle = tokio::spawn(check_cpu_usage());
+    let ram_handle = tokio::spawn(check_ram_usage());
 
-    (StatusCode::OK, Json(HealthDTO {
-        cpu: cpu_result,
-        ram: ram_result,
-    }))
+    let cpu_result = cpu_handle.await.unwrap();
+    let ram_result = ram_handle.await.unwrap();
+
+    match (cpu_result, ram_result) {
+        (Ok(cpu_res), Ok(ram_res)) => (StatusCode::OK, Json(HealthDTO {
+            cpu: cpu_res,
+            ram: ram_res,
+        })),
+        _ => panic!("Sth went wrong"),
+    }
 }
