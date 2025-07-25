@@ -14,7 +14,7 @@ pub async fn check_cpu_usage() -> Result<CpuUsageDTO, CheckError> {
                 fifteen: parts[2].parse().unwrap_or(0.0),
                 result: "Ok".into(),
             })
-        },
+        }
         Err(err) => Err(CheckError::CpuCheckError(err.to_string())),
     }
 }

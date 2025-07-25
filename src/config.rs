@@ -1,18 +1,15 @@
-use std::fs::{self, read_to_string};
 use clap::Parser;
 use serde::Deserialize;
 use serde_json;
+use std::fs;
 
-use crate::models::{
-    errors::ConfigError,
-    log_level::LogLevel,
-};
+use crate::models::{errors::ConfigError, log_level::LogLevel};
 
 #[derive(Parser, Debug)]
 #[command(name = "chechr")]
-struct Args {
-    #[arg(short, long, default_value = "config.yaml")]
-    config: String,
+pub struct Args {
+    #[arg(short, long, default_value = "config.json")]
+    pub config: String,
 }
 
 #[derive(Debug, Deserialize)]
