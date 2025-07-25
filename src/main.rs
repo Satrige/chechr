@@ -4,6 +4,7 @@ use tracing_subscriber;
 mod routes;
 mod handlers;
 mod models;
+mod config;
 
 #[tokio::main]
 async fn main() {
