@@ -22,8 +22,9 @@ async fn main() -> anyhow::Result<()> {
     // build our application with a route
     let app = Router::new().nest("/health", routes::health::routes());
 
-    // TODO: Provide the port via the config
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let port = config.port;
+    let addr = format!("0.0.0.0:{port}");
+    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 
     Ok(())
