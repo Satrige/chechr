@@ -3,7 +3,12 @@ use serde::Deserialize;
 use serde_json;
 use std::fs;
 
-use crate::models::{errors::ConfigError, log_level::LogLevel};
+use crate::{
+    config::cpu_config::CpuConfig,
+    models::{errors::ConfigError, log_level::LogLevel},
+};
+
+mod cpu_config;
 
 #[derive(Parser, Debug)]
 #[command(name = "chechr")]
@@ -16,6 +21,8 @@ pub struct Args {
 pub struct AppConfig {
     pub port: u16,
     pub log_level: Option<LogLevel>,
+
+    pub cpu: Option<CpuConfig>,
 }
 
 impl AppConfig {
