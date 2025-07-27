@@ -4,11 +4,9 @@ use serde_json;
 use std::fs;
 
 use crate::{
-    config::cpu_config::CpuConfig,
+    cpu::cpu_config::CpuConfig,
     models::{errors::ConfigError, log_level::LogLevel},
 };
-
-pub mod cpu_config;
 
 #[derive(Parser, Debug)]
 #[command(name = "chechr")]

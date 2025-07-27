@@ -1,8 +1,10 @@
 use axum::Router;
 use clap::Parser;
 
+mod cpu;
+
+mod checker;
 mod config;
-mod handlers;
 mod logger;
 mod models;
 mod routes;

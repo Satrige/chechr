@@ -2,9 +2,9 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct CpuUsageDTO {
-    pub one: f32,
-    pub five: f32,
-    pub fifteen: f32,
+    pub one: Option<f32>,
+    pub five: Option<f32>,
+    pub fifteen: Option<f32>,
     pub result: String,
 }
 

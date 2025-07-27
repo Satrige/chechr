@@ -1,8 +1,4 @@
-use std::fs;
-
-use crate::config::cpu_config::CpuConfig;
-use crate::models::errors::{CheckError, WrongSettingsError};
-use crate::models::output::CpuUsageDTO;
+use crate::{cpu::cpu_config::CpuConfig, models::errors::WrongSettingsError};
 
 struct CpuThresholdSettings {
     one_threshold: f32,
@@ -10,10 +6,10 @@ struct CpuThresholdSettings {
     fifteen_threshold: f32,
 }
 
-struct CpuSettings {
-    enabled: bool,
-    warning: Option<CpuThresholdSettings>,
-    critical: Option<CpuThresholdSettings>,
+pub struct CpuSettings {
+    pub enabled: bool,
+    pub warning: Option<CpuThresholdSettings>,
+    pub critical: Option<CpuThresholdSettings>,
 }
 
 impl Default for CpuSettings {
@@ -75,21 +71,5 @@ impl CpuSettings {
             }
             None => Ok(Self::default()),
         }
-    }
-}
-
-pub async fn check_cpu_usage() -> Result<CpuUsageDTO, CheckError> {
-    match fs::read_to_string("/proc/loadvg") {
-        Ok(content) => {
-            let parts: Vec<&str> = content.split_whitespace().collect();
-
-            Ok(CpuUsageDTO {
-                one: parts[0].parse().unwrap_or(0.0),
-                five: parts[1].parse().unwrap_or(0.0),
-                fifteen: parts[2].parse().unwrap_or(0.0),
-                result: "Ok".into(),
-            })
-        }
-        Err(err) => Err(CheckError::CpuCheckError(err.to_string())),
     }
 }
