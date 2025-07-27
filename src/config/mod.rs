@@ -8,7 +8,7 @@ use crate::{
     models::{errors::ConfigError, log_level::LogLevel},
 };
 
-mod cpu_config;
+pub mod cpu_config;
 
 #[derive(Parser, Debug)]
 #[command(name = "chechr")]

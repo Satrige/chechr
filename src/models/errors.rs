@@ -16,3 +16,9 @@ pub enum ConfigError {
     #[error("Parse config error: {0}")]
     ParseConfigError(String),
 }
+
+#[derive(thiserror::Error, Debug)]
+pub enum WrongSettingsError {
+    #[error("Wrong CPU settings: {0}")]
+    WrongCpuSettingsError(String),
+}
