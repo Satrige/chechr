@@ -1,16 +1,16 @@
 use std::fs;
 
-use crate::checker::{CheckResult, Checker};
+use crate::checker::{CheckResult, CheckStatus, Checker};
 use crate::cpu::cpu_config::CpuConfig;
 use crate::cpu::cpu_settings::CpuSettings;
-use crate::models::errors::{CheckError, WrongSettingsError};
+use crate::models::errors::CheckError;
 
 pub struct CpuChecker {
     settings: CpuSettings,
 }
 
 impl CpuChecker {
-    pub fn new(cpu_config: &CpuConfig) -> anyhow::Result<Self> {
+    pub fn new(cpu_config: &Option<CpuConfig>) -> anyhow::Result<Self> {
         let settings = CpuSettings::new(cpu_config)?;
 
         Ok(CpuChecker { settings })
@@ -30,6 +30,18 @@ impl CpuChecker {
             Err(err) => Err(CheckError::CpuCheckError(err.to_string())),
         }
     }
+
+    fn is_warning(&self, load_values: &(f32, f32, f32)) -> bool {
+        load_values.0 > self.settings.warning.one_threshold
+            || load_values.1 > self.settings.warning.five_threshold
+            || load_values.2 > self.settings.warning.fifteen_threshold
+    }
+
+    fn is_critical(&self, load_values: &(f32, f32, f32)) -> bool {
+        load_values.0 > self.settings.critical.one_threshold
+            || load_values.1 > self.settings.critical.five_threshold
+            || load_values.2 > self.settings.critical.fifteen_threshold
+    }
 }
 
 impl Checker for CpuChecker {
@@ -39,12 +51,26 @@ impl Checker for CpuChecker {
 
     fn check(&self) -> anyhow::Result<CheckResult> {
         if !self.is_enabled() {
-            Ok(CheckResult {
-                result: crate::checker::CheckStatus::DISABLED,
-                descr: None,
-            })
+            return Ok(CheckResult::new(CheckStatus::DISABLED, None));
         }
 
-        let (one_value, five_value, fifteen_value) = self.get_cpu_usage()?;
+        let load_values = self.get_cpu_usage()?;
+        let (one, five, fifteen) = load_values;
+
+        if self.is_critical(&load_values) {
+            return Ok(CheckResult::new(
+                CheckStatus::CRITICAL,
+                Some(format!("one: {one}, five: {five}, fifteen: {fifteen}")),
+            ));
+        }
+
+        if self.is_warning(&load_values) {
+            return Ok(CheckResult::new(
+                CheckStatus::WARNING,
+                Some(format!("one: {one}, five: {five}, fifteen: {fifteen}")),
+            ));
+        }
+
+        Ok(CheckResult::new(CheckStatus::OK, None))
     }
 }

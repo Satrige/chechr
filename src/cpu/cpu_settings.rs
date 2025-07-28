@@ -1,31 +1,33 @@
 use crate::{cpu::cpu_config::CpuConfig, models::errors::WrongSettingsError};
 
 struct CpuThresholdSettings {
-    one_threshold: f32,
-    five_threshold: f32,
-    fifteen_threshold: f32,
+    pub one_threshold: f32,
+    pub five_threshold: f32,
+    pub fifteen_threshold: f32,
+}
+
+impl CpuThresholdSettings {
+    fn new(one_threshold: f32, five_threshold: f32, fifteen_threshold: f32) -> Self {
+        CpuThresholdSettings {
+            one_threshold,
+            five_threshold,
+            fifteen_threshold,
+        }
+    }
 }
 
 pub struct CpuSettings {
     pub enabled: bool,
-    pub warning: Option<CpuThresholdSettings>,
-    pub critical: Option<CpuThresholdSettings>,
+    pub warning: CpuThresholdSettings,
+    pub critical: CpuThresholdSettings,
 }
 
 impl Default for CpuSettings {
     fn default() -> Self {
         CpuSettings {
             enabled: true,
-            warning: Some(CpuThresholdSettings {
-                one_threshold: 0.5,
-                five_threshold: 0.5,
-                fifteen_threshold: 0.5,
-            }),
-            critical: Some(CpuThresholdSettings {
-                one_threshold: 1.0,
-                five_threshold: 1.0,
-                fifteen_threshold: 1.0,
-            }),
+            warning: CpuThresholdSettings::new(0.5, 0.5, 0.5),
+            critical: CpuThresholdSettings::new(1.0, 1.0, 1.0),
         }
     }
 }
@@ -40,8 +42,8 @@ impl CpuSettings {
                 {
                     return Ok(CpuSettings {
                         enabled: false,
-                        warning: None,
-                        critical: None,
+                        warning: CpuThresholdSettings::new(0.0, 0.0, 0.0),
+                        critical: CpuThresholdSettings::new(0.0, 0.0, 0.0),
                     });
                 }
 
@@ -57,16 +59,16 @@ impl CpuSettings {
 
                 Ok(CpuSettings {
                     enabled: true,
-                    warning: Some(CpuThresholdSettings {
-                        one_threshold: warning_thresholds.one_threshold,
-                        five_threshold: warning_thresholds.five_threshold,
-                        fifteen_threshold: warning_thresholds.fifteen_threshold,
-                    }),
-                    critical: Some(CpuThresholdSettings {
-                        one_threshold: critical_thresholds.one_threshold,
-                        five_threshold: critical_thresholds.five_threshold,
-                        fifteen_threshold: critical_thresholds.fifteen_threshold,
-                    }),
+                    warning: CpuThresholdSettings::new(
+                        warning_thresholds.one_threshold,
+                        warning_thresholds.five_threshold,
+                        warning_thresholds.fifteen_threshold,
+                    ),
+                    critical: CpuThresholdSettings::new(
+                        critical_thresholds.one_threshold,
+                        critical_thresholds.five_threshold,
+                        critical_thresholds.fifteen_threshold,
+                    ),
                 })
             }
             None => Ok(Self::default()),

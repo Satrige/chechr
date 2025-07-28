@@ -15,6 +15,12 @@ pub struct CheckResult {
     descr: Option<String>,
 }
 
+impl CheckResult {
+    pub fn new(result: CheckStatus, descr: Option<String>) -> Self {
+        CheckResult { result, descr }
+    }
+}
+
 pub trait Checker {
     fn is_enabled(&self) -> bool;
 
