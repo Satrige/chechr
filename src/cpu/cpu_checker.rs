@@ -1,16 +1,18 @@
 use std::fs;
 
-use crate::checker::{CheckResult, CheckStatus, Checker};
 use crate::cpu::cpu_config::CpuConfig;
 use crate::cpu::cpu_settings::CpuSettings;
-use crate::models::errors::CheckError;
+use crate::models::{
+    checker::{CheckResult, CheckStatus, Checker},
+    errors::CheckError,
+};
 
 pub struct CpuChecker {
     settings: CpuSettings,
 }
 
 impl CpuChecker {
-    pub fn new(cpu_config: &Option<CpuConfig>) -> anyhow::Result<Self> {
+    pub fn new(cpu_config: &CpuConfig) -> anyhow::Result<Self> {
         let settings = CpuSettings::new(cpu_config)?;
 
         Ok(CpuChecker { settings })

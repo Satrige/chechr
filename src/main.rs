@@ -3,11 +3,11 @@ use clap::Parser;
 
 mod cpu;
 
-mod checker;
 mod config;
 mod logger;
 mod models;
 mod routes;
+mod helpers;
 
 use config::{AppConfig, Args};
 use logger::set_up_logger;
@@ -20,6 +20,8 @@ async fn main() -> anyhow::Result<()> {
     set_up_logger(&config);
 
     tracing::info!("Started chechr on port: {}", config.port);
+
+    let checkers
 
     // build our application with a route
     let app = Router::new().nest("/health", routes::health::routes());
