@@ -21,8 +21,8 @@ impl CheckResult {
     }
 }
 
-pub trait Checker {
+pub trait Checker: Send + Sync {
     fn is_enabled(&self) -> bool;
 
-    fn check(&self) -> anyhow::Result<CheckResult>;
+    async fn check(&self) -> anyhow::Result<CheckResult>;
 }

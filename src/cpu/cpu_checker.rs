@@ -51,7 +51,7 @@ impl Checker for CpuChecker {
         self.settings.enabled
     }
 
-    fn check(&self) -> anyhow::Result<CheckResult> {
+    async fn check(&self) -> anyhow::Result<CheckResult> {
         if !self.is_enabled() {
             return Ok(CheckResult::new(CheckStatus::DISABLED, None));
         }

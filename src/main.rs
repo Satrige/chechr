@@ -12,7 +12,7 @@ mod routes;
 use config::{AppConfig, Args};
 use logger::set_up_logger;
 
-use crate::helpers::get_checkers::get_checkers;
+use crate::{helpers::get_checkers::get_checkers, routes::health::HealthRouters};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -25,7 +25,7 @@ async fn main() -> anyhow::Result<()> {
 
     let checkers = get_checkers(&config)?;
 
-    let app = Router::new().nest("/health", routes::health::routes(checkers));
+    let app = Router::new().nest("/health", HealthRouters::new(checkers).get_rountes());
 
     let port = config.port;
     let addr = format!("0.0.0.0:{port}");

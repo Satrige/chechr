@@ -4,8 +4,20 @@ use axum::{Json, Router, http::StatusCode, response::IntoResponse, routing::get}
 use serde_json;
 use tokio;
 
-pub fn routes(checkers: Vec<Box<dyn Checker>>) -> Router {
-    Router::new().route("/", get(handler))
+pub struct HealthRouters {
+    checkers: Vec<Box<dyn Checker>>,
+}
+
+impl HealthRouters {
+    pub fn new(checkers: Vec<Box<dyn Checker>>) -> Self {
+        HealthRouters { checkers }
+    }
+
+    pub fn get_rountes(&self) -> Router {
+        Router::new().route("/", get(handler))
+    }
+
+    fn handler() -> Result<impl IntoResponse, impl IntoResponse> {}
 }
 
 async fn handler() -> Result<impl IntoResponse, impl IntoResponse> {
