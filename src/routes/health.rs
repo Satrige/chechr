@@ -1,10 +1,10 @@
-use crate::handlers::{cpu::check_cpu_usage, ram::check_ram_usage};
+use crate::models::checker::Checker;
 use crate::models::output::HealthDTO;
 use axum::{Json, Router, http::StatusCode, response::IntoResponse, routing::get};
 use serde_json;
 use tokio;
 
-pub fn routes() -> Router {
+pub fn routes(checkers: Vec<Box<dyn Checker>>) -> Router {
     Router::new().route("/", get(handler))
 }
 

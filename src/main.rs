@@ -4,13 +4,15 @@ use clap::Parser;
 mod cpu;
 
 mod config;
+mod helpers;
 mod logger;
 mod models;
 mod routes;
-mod helpers;
 
 use config::{AppConfig, Args};
 use logger::set_up_logger;
+
+use crate::helpers::get_checkers::get_checkers;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -21,10 +23,9 @@ async fn main() -> anyhow::Result<()> {
 
     tracing::info!("Started chechr on port: {}", config.port);
 
-    let checkers
+    let checkers = get_checkers(&config)?;
 
-    // build our application with a route
-    let app = Router::new().nest("/health", routes::health::routes());
+    let app = Router::new().nest("/health", routes::health::routes(checkers));
 
     let port = config.port;
     let addr = format!("0.0.0.0:{port}");
