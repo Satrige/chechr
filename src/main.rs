@@ -1,21 +1,36 @@
 use axum::Router;
-use tracing_subscriber;
+use clap::Parser;
 
-mod routes;
-mod handlers;
+mod cpu;
+
+mod config;
+mod helpers;
+mod logger;
 mod models;
+mod routes;
+
+use config::{AppConfig, Args};
+use logger::set_up_logger;
+
+use crate::{helpers::get_checkers::get_checkers, routes::health::HealthRouters};
 
 #[tokio::main]
-async fn main() {
-    // initialize tracing
-    tracing_subscriber::fmt::init();
-    tracing::info!("Started");
+async fn main() -> anyhow::Result<()> {
+    let args = Args::parse();
+    let config = AppConfig::from_file(&args.config)?;
 
-     // build our application with a route
-    let app = Router::new()
-        .nest("/health", routes::health::routes());
-    
-    // TODO: Provide the port via the config
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    set_up_logger(&config);
+
+    tracing::info!("Started chechr on port: {}", config.port);
+
+    let checkers = get_checkers(&config)?;
+
+    let app = Router::new().nest("/health", HealthRouters::new(checkers).get_rountes());
+
+    let port = config.port;
+    let addr = format!("0.0.0.0:{port}");
+    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
+
+    Ok(())
 }
