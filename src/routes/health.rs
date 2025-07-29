@@ -28,10 +28,9 @@ async fn handler(
         .iter() // Iterate over the Arcs
         .cloned() // Bump each reference count (Arc) by 1
         .map(|checker| {
-            let clonned_checker = checker.clone();
             spawn_blocking(move || {
-                let checker_name = clonned_checker.get_name();
-                let result = clonned_checker.check().unwrap_or_else(|e| {
+                let checker_name = checker.get_name();
+                let result = checker.check().unwrap_or_else(|e| {
                     tracing::warn!("Error: checker: {} | {}", checker_name, e.to_string());
 
                     CheckResult::new(

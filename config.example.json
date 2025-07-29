@@ -3,8 +3,15 @@
     "log_level": "info",
     "cpu": {
         "enabled": true,
-        "one_threshold": 1.0,
-        "five_threshold": 1.0,
-        "fifteen_threshold": 1.0
+        "warning": {
+            "one_threshold": 1.0,
+            "five_threshold": 1.0,
+            "fifteen_threshold": 1.0
+        },
+        "critical": {
+            "one_threshold": 1.0,
+            "five_threshold": 1.0,
+            "fifteen_threshold": 1.0
+        }
     }
 }
