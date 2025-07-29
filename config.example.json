@@ -13,5 +13,10 @@
             "five_threshold": 1.0,
             "fifteen_threshold": 1.0
         }
+    },
+    "ram": {
+        "enabled": true,
+        "warning_threshold": 70,
+        "critical_threshold": 80
     }
 }

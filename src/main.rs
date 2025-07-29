@@ -2,6 +2,7 @@ use axum::Router;
 use clap::Parser;
 
 mod cpu;
+mod ram;
 
 mod config;
 mod helpers;
@@ -12,7 +13,7 @@ mod routes;
 use config::{AppConfig, Args};
 use logger::set_up_logger;
 
-use crate::{helpers::get_checkers::get_checkers, routes::health::HealthRouters};
+use crate::{helpers::get_checkers::get_checkers, routes::HealthRouters};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
