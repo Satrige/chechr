@@ -6,6 +6,7 @@ use std::fs;
 use crate::{
     cpu::cpu_config::CpuConfig,
     models::{errors::ConfigError, log_level::LogLevel},
+    ram::ram_config::RamConfig,
 };
 
 #[derive(Parser, Debug)]
@@ -21,6 +22,7 @@ pub struct AppConfig {
     pub log_level: Option<LogLevel>,
 
     pub cpu: Option<CpuConfig>,
+    pub ram: Option<RamConfig>,
 }
 
 impl AppConfig {
