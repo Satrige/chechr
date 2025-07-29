@@ -1,45 +1,66 @@
-use crate::models::checker::Checker;
-use crate::models::output::HealthDTO;
-use axum::{Json, Router, http::StatusCode, response::IntoResponse, routing::get};
-use serde_json;
-use tokio;
+use crate::models::checker::{CheckResult, CheckStatus, Checker};
+use axum::{Json, Router, http::StatusCode, routing::get};
+use futures::future::join_all;
+use std::sync::Arc;
+use tokio::task::spawn_blocking;
 
 pub struct HealthRouters {
-    checkers: Vec<Box<dyn Checker>>,
+    checkers: Arc<Vec<Arc<dyn Checker + Send + Sync>>>,
 }
 
 impl HealthRouters {
-    pub fn new(checkers: Vec<Box<dyn Checker>>) -> Self {
-        HealthRouters { checkers }
+    pub fn new(checkers: Vec<Arc<dyn Checker + Send + Sync>>) -> Self {
+        HealthRouters {
+            checkers: Arc::new(checkers),
+        }
     }
 
     pub fn get_rountes(&self) -> Router {
-        Router::new().route("/", get(handler))
+        let clonned_checkers = self.checkers.clone();
+        Router::new().route("/", get(move || handler(clonned_checkers)))
     }
-
-    fn handler() -> Result<impl IntoResponse, impl IntoResponse> {}
 }
 
-async fn handler() -> Result<impl IntoResponse, impl IntoResponse> {
-    let cpu_handle = tokio::spawn(check_cpu_usage());
-    let ram_handle = tokio::spawn(check_ram_usage());
+async fn handler(
+    checkers: Arc<Vec<Arc<dyn Checker + Send + Sync>>>,
+) -> (StatusCode, Json<Vec<CheckResult>>) {
+    let handlers = checkers
+        .iter() // Iterate over the Arcs
+        .cloned() // Bump each reference count (Arc) by 1
+        .map(|checker| {
+            let clonned_checker = checker.clone();
+            spawn_blocking(move || {
+                let checker_name = clonned_checker.get_name();
+                let result = clonned_checker.check().unwrap_or_else(|e| {
+                    tracing::warn!("Error: checker: {} | {}", checker_name, e.to_string());
 
-    let cpu_result = cpu_handle.await.unwrap();
-    let ram_result = ram_handle.await.unwrap();
+                    CheckResult::new(
+                        checker_name.to_string(),
+                        CheckStatus::ERROR,
+                        Some(e.to_string()),
+                    )
+                });
 
-    match (cpu_result, ram_result) {
-        (Ok(cpu_res), Ok(ram_res)) => Ok((
-            StatusCode::OK,
-            Json(HealthDTO {
-                cpu: cpu_res,
-                ram: ram_res,
-            }),
-        )
-            .into_response()),
-        _ => Err((
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(serde_json::json!({ "error": "Internal Error" })),
-        )
-            .into_response()),
-    }
+                result
+            })
+        });
+
+    let check_results: Vec<CheckResult> = join_all(handlers)
+        .await
+        .into_iter()
+        .map(|res| match res {
+            Ok(single_result) => single_result,
+            Err(e) => {
+                tracing::error!("Join error: {}", e.to_string());
+
+                CheckResult::new(
+                    "unknown".to_string(),
+                    CheckStatus::ERROR,
+                    Some("Join error".to_string()),
+                )
+            }
+        })
+        .collect();
+
+    (StatusCode::OK, Json(check_results))
 }

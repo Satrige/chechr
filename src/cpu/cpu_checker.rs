@@ -9,13 +9,17 @@ use crate::models::{
 
 pub struct CpuChecker {
     settings: CpuSettings,
+    name: String,
 }
 
 impl CpuChecker {
     pub fn new(cpu_config: &CpuConfig) -> anyhow::Result<Self> {
         let settings = CpuSettings::new(cpu_config)?;
 
-        Ok(CpuChecker { settings })
+        Ok(CpuChecker {
+            settings,
+            name: "cpu".to_string(),
+        })
     }
 
     fn get_cpu_usage(&self) -> Result<(f32, f32, f32), CheckError> {
@@ -47,13 +51,21 @@ impl CpuChecker {
 }
 
 impl Checker for CpuChecker {
+    fn get_name(&self) -> &str {
+        self.name.as_str()
+    }
+
     fn is_enabled(&self) -> bool {
         self.settings.enabled
     }
 
-    async fn check(&self) -> anyhow::Result<CheckResult> {
+    fn check(&self) -> anyhow::Result<CheckResult> {
         if !self.is_enabled() {
-            return Ok(CheckResult::new(CheckStatus::DISABLED, None));
+            return Ok(CheckResult::new(
+                self.name.clone(),
+                CheckStatus::DISABLED,
+                None,
+            ));
         }
 
         let load_values = self.get_cpu_usage()?;
@@ -61,6 +73,7 @@ impl Checker for CpuChecker {
 
         if self.is_critical(&load_values) {
             return Ok(CheckResult::new(
+                self.name.clone(),
                 CheckStatus::CRITICAL,
                 Some(format!("one: {one}, five: {five}, fifteen: {fifteen}")),
             ));
@@ -68,11 +81,12 @@ impl Checker for CpuChecker {
 
         if self.is_warning(&load_values) {
             return Ok(CheckResult::new(
+                self.name.clone(),
                 CheckStatus::WARNING,
                 Some(format!("one: {one}, five: {five}, fifteen: {fifteen}")),
             ));
         }
 
-        Ok(CheckResult::new(CheckStatus::OK, None))
+        Ok(CheckResult::new(self.name.clone(), CheckStatus::OK, None))
     }
 }

@@ -4,8 +4,8 @@ use thiserror;
 pub enum CheckError {
     #[error("Cpu check error: {0}")]
     CpuCheckError(String),
-    #[error("Ram check error: {0}")]
-    RamCheckError(String),
+    // #[error("Ram check error: {0}")]
+    // RamCheckError(String),
 }
 
 #[derive(thiserror::Error, Debug)]
