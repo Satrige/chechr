@@ -22,7 +22,7 @@ async fn main() -> anyhow::Result<()> {
 
     set_up_logger(&config);
 
-    tracing::info!("Started chechr on port: {}", config.port);
+    tracing::info!("Started checkr on port: {}", config.port);
 
     let checkers = get_checkers(&config)?;
 
