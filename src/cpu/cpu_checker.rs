@@ -14,7 +14,7 @@ pub struct CpuChecker {
 
 impl CpuChecker {
     pub fn new(cpu_config: &CpuConfig) -> anyhow::Result<Self> {
-        let settings = CpuSettings::new(cpu_config)?;
+        let settings = CpuSettings::try_from(cpu_config)?;
 
         Ok(CpuChecker {
             settings,
