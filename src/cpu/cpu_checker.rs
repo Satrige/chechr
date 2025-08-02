@@ -90,3 +90,38 @@ impl Checker for CpuChecker {
         Ok(CheckResult::new(self.name.clone(), CheckStatus::OK, None))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    mod cpu_checker {
+        use super::*;
+
+        mod is_warning {
+            use crate::cpu::cpu_config::CpuThresholdsConfig;
+
+            use super::*;
+
+            #[test]
+            fn it_should_fire_warning_because_of_one_minute_threshold() {
+                let cpu_checker = CpuChecker::new(&CpuConfig {
+                    enabled: Some(true),
+                    warning: Some(CpuThresholdsConfig {
+                        one_threshold: 1.0,
+                        five_threshold: 1.0,
+                        fifteen_threshold: 1.0,
+                    }),
+                    critical: Some(CpuThresholdsConfig {
+                        one_threshold: 1.0,
+                        five_threshold: 1.0,
+                        fifteen_threshold: 1.0,
+                    }),
+                })
+                .unwrap();
+
+                assert_eq!(cpu_checker.is_warning(&(1.1, 0.9, 0.9)), true);
+            }
+        }
+    }
+}
